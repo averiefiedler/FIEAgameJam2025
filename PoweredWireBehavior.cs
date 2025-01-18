@@ -1,36 +1,32 @@
-Using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class PoweredWireBehavior : MonoBehavior
+public class PoweredWireBehavior : MonoBehaviour
 {
-    bool mouseDown = false
+    bool mouseDown = false;
     public PoweredWireStats powerWireS;
     LineRenderer line;
-    // Start is called before the first frame update
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         powerWireS = gameObject.GetComponent<PoweredWireStats>();
-        line = gameObject.GetComponent<LineRenderer>();    
+        line = gameObject.GetComponent<LineRenderer>();
     }
 
     // Update is called once per frame
     void Update()
     {
         MoveWire();
-        line.SetPosition(3, new Vector3(gameObject.transform.localPosition.x-.1f, gameObject.transform.localPosition.y - .1f, 0));
-        line.SetPosition(3, new Vector3(gameObject.transform.localPosition.x-.4f, gameObject.transform.localPosition.y - .1f, 0));
+        line.SetPosition(3, new Vector3(gameObject.transform.position.x - .1f, gameObject.transform.position.y - .1f, gameObject.transform.position.z));
+        line.SetPosition(2, new Vector3(gameObject.transform.position.x - .4f, gameObject.transform.position.y - .1f, gameObject.transform.position.z));
     }
     void OnMouseDown()
     {
         mouseDown = true;
     }
-
     void OnMouseOver()
     {
         powerWireS.movable = true;
     }
-
     void OnMouseExit()
     {
         if (!powerWireS.moving)
@@ -38,25 +34,26 @@ public class PoweredWireBehavior : MonoBehavior
     }
     void OnMouseUp()
     {
-        mouseDown = false
+        mouseDown = false;
         if(!powerWireS.connected)
         gameObject.transform.position = powerWireS.startPosition;
-        if(powerWireS.connected)
+        if (powerWireS.connected)
             gameObject.transform.position = powerWireS.connectedPosition;
     }
     void MoveWire()
     {
+        // if mouse is down and movable then i can move my wire and if not then its not moving
         if (mouseDown && powerWireS.movable)
         {
-        powerWireS.move = true;
-        float mouseX = Input.mousePosition.x;
-        float mouseY = Input.mousePosition.y;
+            powerWireS.moving = true;
+            float mouseX = Input.mousePosition.x;
+            float mouseY = Input.mousePosition.y;
 
-        gameObject.transform.position = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, 1));
-        gameObject.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y, trasnform.parent.transform.position.z);
+            gameObject.transform.position = Camera.main.ScreenToWorldPoint(new Vector3(mouseX, mouseY, 1));
+           // skipped parent transform position thats in video here because it moved the wire behind the background, may cause problems later
+
         }
         else
             powerWireS.moving = false;
     }
-    
 }
