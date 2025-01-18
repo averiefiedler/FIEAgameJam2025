@@ -1,0 +1,103 @@
+using UnityEditor.Experimental.GraphView;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerMovement : MonoBehaviour
+{
+    [Header("Movement")]
+    public Rigidbody2D rb;
+    public float movespeed = 5f;
+    float horizontalMovement;
+    public float jumpPower = 10f;
+    public int maxJumps = 2;
+    int jumpsRemaining;
+
+    [Header("GroundCheck")]
+    public Transform GroundcheckPos;
+    public Vector2 groundCheckSize = new Vector2(0.5f, 0.05f);
+    public LayerMask groundLayer;
+
+    [Header("Gravity")]
+    public float baseGravity = 2f;
+    public float maxFallSpeed = 18f;
+    public float fallSpeedMultiplier = 2f;
+
+    [Header("Animation")]
+
+    public Animator animator;
+   
+    void Start()
+    {
+        rb.freezeRotation = true;
+        animator = GetComponent<Animator>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        //this makes him move//
+        rb.linearVelocity = new Vector2(horizontalMovement * movespeed, rb.linearVelocity.y);
+        //This makes the guy turn//
+        if (rb.linearVelocityX > 0.1)
+            transform.localScale = new Vector2(.2f, .2f);
+
+        else if (rb.linearVelocityX < -0.1)
+            transform.localScale = new Vector2(-.2f, .2f);
+
+        //ground Check always updates//
+        GroundCheck();
+        Gravity();
+        animator.SetFloat("magnitude", rb.linearVelocity.magnitude);
+    }
+
+    //This one asks for leftnRight//
+    public void Move(InputAction.CallbackContext context)
+    {
+        horizontalMovement = context.ReadValue<Vector2>().x;
+    }
+   
+    //This one asks for Jump//
+    public void Jump(InputAction.CallbackContext context)
+    {
+        if (jumpsRemaining > 0)
+        {
+            if (context.performed)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpPower);
+                jumpsRemaining--;
+            }
+            else if (context.canceled)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, rb.linearVelocity.y * 0.5f);
+                jumpsRemaining--;
+            }
+
+        }
+    }
+    private void GroundCheck()
+    {
+        if (Physics2D.OverlapBox(GroundcheckPos.position, groundCheckSize, 0, groundLayer))
+        {
+            jumpsRemaining = 2;
+        }
+    }
+    private void Gravity()
+    {
+        if (rb.linearVelocity.y < 0)
+        {
+            rb.gravityScale = baseGravity * fallSpeedMultiplier;
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, Mathf.Max(rb.linearVelocity.y, -maxFallSpeed));
+        }
+        else
+        {
+            rb.gravityScale = baseGravity;
+        }
+    }
+    private void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.white;
+        Gizmos.DrawWireCube(GroundcheckPos.position, groundCheckSize);
+    }
+}
+    
+
