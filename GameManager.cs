@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     public void mainMenu()
     {
         SceneManager.LoadScene("MainMenu");
+        Debug.Log("Main Menu has Loaded.");
     }
 
     public void quit()
